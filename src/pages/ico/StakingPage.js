@@ -448,6 +448,14 @@ export default function StakingPage() {
                             </div>
                         </div>
                     )}
+                    <div className="md:hidden flex justify-start font-medium text-center text-white text-sm rounded connect-button font-16 h-full mt-6 w-full">
+                        <ConnectWallet setWalletConnected={(val) => {
+                            if (val === undefined)
+                                setWalletConnected(false)
+                            else
+                                setWalletConnected(val)
+                        }} />
+                    </div>
                     <div className="bg-reward rounded-xl w-full flex flex-col items-start py-4 px-2.5 gap-2.5 mt-5">
                         <div className="flex items-center gap-3">
                             <img src={ethIco} alt="" className="h-8 w-auto" />

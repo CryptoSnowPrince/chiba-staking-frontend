@@ -23,7 +23,7 @@ export const ConnectWallet = ({setWalletConnected}) => {
                         authenticationStatus === 'authenticated');
                 setWalletConnected (connected)
                 return (
-                    <div
+                    <div className='w-full'
                         {...(!ready && {
                             'aria-hidden': true,
                             'style': {
