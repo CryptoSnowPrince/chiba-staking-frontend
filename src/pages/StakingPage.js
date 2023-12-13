@@ -1,21 +1,21 @@
 import './index.css'
 import React, { useState, useEffect, useRef } from "react";
-import { useStakingContractStatus } from "../../hooks/useStakingContractStatus"
-import StakeBtn from "../../components/StakeBtn";
-import LockRemain from "../../components/LockRemain";
-import { ConnectWallet } from "../../components/ConnectWallet";
+import { useStakingContractStatus } from "../hooks/useStakingContractStatus"
+import StakeBtn from "../components/StakeBtn";
+import LockRemain from "../components/LockRemain";
+import { ConnectWallet } from "../components/ConnectWallet";
 import ethIco from "../../assets/img/eth.png"
 import chibaIco from "../../assets/img/chiba.png"
 import giftIco from "../../assets/img/gift.png"
-import { global } from '../../config/global';
+import { global } from '../config/global';
 import { useAccount } from "wagmi";
 import { toast } from "react-toastify";
-import StakingContractABI from "../../assets/abi/stakingContract.json";
-import tokenStakingContractABI from "../../assets/abi/tokenStakingContract.json";
-import IUniswapV2Router01ContractABI from "../../assets/abi/IUniswapV2Router01ContractABI.json";
+import StakingContractABI from "../assets/abi/stakingContract.json";
+import tokenStakingContractABI from "../assets/abi/tokenStakingContract.json";
+import IUniswapV2Router01ContractABI from "../assets/abi/IUniswapV2Router01ContractABI.json";
 import { parseUnits, formatUnits } from 'viem';
 import { writeContract, prepareWriteContract, waitForTransaction } from "@wagmi/core"
-import CommandBtnList from '../../components/CommandBtnList';
+import CommandBtnList from '../components/CommandBtnList';
 import { useContractRead } from 'wagmi';
 
 
