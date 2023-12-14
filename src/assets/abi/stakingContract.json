@@ -7,14 +7,14 @@
                 "type": "address"
             },
             {
-                "internalType": "uint256",
+                "internalType": "uint256[]",
                 "name": "_lockupPeriod",
-                "type": "uint256"
+                "type": "uint256[]"
             },
             {
-                "internalType": "address",
-                "name": "__router",
-                "type": "address"
+                "internalType": "uint256[]",
+                "name": "_percentage",
+                "type": "uint256[]"
             }
         ],
         "stateMutability": "nonpayable",
@@ -23,6 +23,12 @@
     {
         "anonymous": false,
         "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "indexed": false,
                 "internalType": "address",
@@ -36,6 +42,12 @@
     {
         "anonymous": false,
         "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "indexed": true,
                 "internalType": "address",
@@ -55,6 +67,12 @@
     {
         "anonymous": false,
         "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "indexed": true,
                 "internalType": "address",
@@ -100,6 +118,12 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
+            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "user",
@@ -119,6 +143,12 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
+            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "user",
@@ -136,6 +166,11 @@
     },
     {
         "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "internalType": "bool",
                 "name": "_compound",
@@ -155,6 +190,11 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
+            {
                 "internalType": "address",
                 "name": "_wallet",
                 "type": "address"
@@ -171,6 +211,24 @@
             }
         ],
         "name": "claimRewardAdmin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_lockupSeconds",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_percentage",
+                "type": "uint256"
+            }
+        ],
+        "name": "createPool",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -196,7 +254,62 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "getAllPools",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "percentage",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "lockupPeriod",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalStakedUsers",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalSharesDeposited",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "rewardsPerShare",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalDistributed",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalRewards",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct StakingPool.PoolInfo[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "internalType": "address",
                 "name": "wallet",
@@ -204,19 +317,6 @@
             }
         ],
         "name": "getUnpaid",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "lockupPeriod",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -241,6 +341,68 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "pools",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "percentage",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "lockupPeriod",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalStakedUsers",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalSharesDeposited",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "rewardsPerShare",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalDistributed",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalRewards",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_idx",
+                "type": "uint256"
+            }
+        ],
+        "name": "removePool",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "renounceOwnership",
         "outputs": [],
@@ -253,6 +415,11 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "name": "rewards",
@@ -272,27 +439,27 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "rewardsPerShare",
-        "outputs": [
+        "inputs": [
             {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
+                "internalType": "uint256[]",
+                "name": "_seconds",
+                "type": "uint256[]"
             }
         ],
-        "stateMutability": "view",
+        "name": "setLockupPeriods",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "_seconds",
-                "type": "uint256"
+                "internalType": "uint256[]",
+                "name": "_percentages",
+                "type": "uint256[]"
             }
         ],
-        "name": "setLockupPeriod",
+        "name": "setPercentages",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -316,6 +483,11 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "name": "shares",
@@ -338,6 +510,11 @@
         "inputs": [
             {
                 "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
                 "name": "_amount",
                 "type": "uint256"
             }
@@ -349,6 +526,11 @@
     },
     {
         "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "internalType": "address[]",
                 "name": "_wallets",
@@ -379,58 +561,6 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "totalDistributed",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "totalRewards",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "totalSharesDeposited",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "totalStakedUsers",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "address",
@@ -445,6 +575,11 @@
     },
     {
         "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "internalType": "uint256",
                 "name": "_amount",

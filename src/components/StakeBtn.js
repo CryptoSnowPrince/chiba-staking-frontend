@@ -12,7 +12,7 @@ export const StakeBtn = function ({ connected, stakeModalOption, amount }) {
   useEffect(() => {
     setWalletConnected(connected)
   }, [connected])
-  // console.log (connected, ">>>>>>>>>>>")
+  
   return (
     <>
       {walletConnected === false &&

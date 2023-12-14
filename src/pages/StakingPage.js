@@ -4,9 +4,9 @@ import { useStakingContractStatus } from "../hooks/useStakingContractStatus"
 import StakeBtn from "../components/StakeBtn";
 import LockRemain from "../components/LockRemain";
 import { ConnectWallet } from "../components/ConnectWallet";
-import ethIco from "../../assets/img/eth.png"
-import chibaIco from "../../assets/img/chiba.png"
-import giftIco from "../../assets/img/gift.png"
+import ethIco from "../assets/img/eth.png"
+import chibaIco from "../assets/img/chiba.png"
+import giftIco from "../assets/img/gift.png"
 import { global } from '../config/global';
 import { useAccount } from "wagmi";
 import { toast } from "react-toastify";
@@ -35,18 +35,21 @@ export default function StakingPage() {
 
     const {
         walletBalance,             // Amount of connected account's CHIBA tokens 
+        // For 14 days pool
         totalEthRewarded_14,       // totalRewards
         totalStakedAmount_14,      // totalSharesDeposited of contract, total staked chiba amount
         stakedAmountPerUser_14,    // staked amount per user
         stakedTimePerUser_14,      // staked time per user
         unClaimed_14,
         tokenRewarded_14,          // Earned $CHIBA token amount
+        // For 28 days pool
         totalEthRewarded_28,       // totalRewards
         totalStakedAmount_28,      // totalSharesDeposited of contract, total staked chiba amount
         stakedAmountPerUser_28,    // staked amount per user
         stakedTimePerUser_28,      // staked time per user
         unClaimed_28,
         tokenRewarded_28,          // Earned $CHIBA token amount
+        // For 56 days pool
         totalEthRewarded_56,       // totalRewards
         totalStakedAmount_56,      // totalSharesDeposited of contract, total staked chiba amount
         stakedAmountPerUser_56,    // staked amount per user
@@ -56,14 +59,10 @@ export default function StakingPage() {
     } = useStakingContractStatus()
 
     const wrapperRef = useRef(null);
-
     const totalEthRewarded = parseFloat(totalEthRewarded_14) + parseFloat(totalEthRewarded_28) + parseFloat(totalEthRewarded_56);
-    const stakingContractAddress_14 = global.STAKING_CONTRACTS.Testnet_14;
-    const tokenStakingContractAddress_14 = global.STAKING_EXTENSION_CONTRACTS.Testnet_14;
-    const stakingContractAddress_28 = global.STAKING_CONTRACTS.Testnet_28;
-    const tokenStakingContractAddress_28 = global.STAKING_EXTENSION_CONTRACTS.Testnet_28;
-    const stakingContractAddress_56 = global.STAKING_CONTRACTS.Testnet_56;
-    const tokenStakingContractAddress_56 = global.STAKING_EXTENSION_CONTRACTS.Testnet_56;
+
+    const stakingContractAddress = global.STAKING_CONTRACTS;
+    const tokenStakingContractAddress = global.STAKING_EXTENSION_CONTRACTS;
     const EthDecimals = global.EthDecimals;
     const IUniswapV2Router01Address = global.IUniswapV2Router01Address;
 
@@ -87,9 +86,10 @@ export default function StakingPage() {
             setStakedPercent_28(parseFloat((Number(stakedAmountPerUser_28) * 100) / Number(totalStakedAmount_28)).toFixed(6));
         if (stakedAmountPerUser_56 && totalStakedAmount_56 !== 0)
             setStakedPercent_56(parseFloat((Number(stakedAmountPerUser_56) * 100) / Number(totalStakedAmount_56)).toFixed(6));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stakedAmountPerUser_14, stakedAmountPerUser_28, stakedAmountPerUser_56])
 
-    // Amount of CHIBA toke to swap with earned WETH.
+    // Amount of CHIBA token to swap with earned WETH as reward
     const _data1 = useContractRead({
         address: IUniswapV2Router01Address,
         abi: IUniswapV2Router01ContractABI,
@@ -135,10 +135,10 @@ export default function StakingPage() {
                 if (stakedAmountPerUser_14 > 0 && poolOption === 14 && _minTokensToReceive1 > 0) {
                     data = {
                         ...data,
-                        address: stakingContractAddress_14,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'claimReward',
-                        args: [true, parseUnits((_minTokensToReceive1 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
+                        args: [0, true, parseUnits((_minTokensToReceive1 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
                     }
                     const preparedData = await prepareWriteContract(data)
                     const writeData = await writeContract(preparedData)
@@ -156,10 +156,10 @@ export default function StakingPage() {
                 } else if (stakedAmountPerUser_28 > 0 && poolOption === 28 && _minTokensToReceive2 > 0) {
                     data = {
                         ...data,
-                        address: stakingContractAddress_28,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'claimReward',
-                        args: [true, parseUnits((_minTokensToReceive2 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
+                        args: [1, true, parseUnits((_minTokensToReceive2 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
                     }
                     const preparedData = await prepareWriteContract(data)
                     const writeData = await writeContract(preparedData)
@@ -177,10 +177,10 @@ export default function StakingPage() {
                 } else if (stakedAmountPerUser_56 > 0 && poolOption === 56 && _minTokensToReceive3 > 0) {
                     data = {
                         ...data,
-                        address: stakingContractAddress_56,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'claimReward',
-                        args: [true, parseUnits((_minTokensToReceive3 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
+                        args: [2, true, parseUnits((_minTokensToReceive3 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
                     }
                     const preparedData = await prepareWriteContract(data)
                     const writeData = await writeContract(preparedData)
@@ -200,10 +200,10 @@ export default function StakingPage() {
                 if (stakedAmountPerUser_14 > 0 && poolOption === 14) {
                     data = {
                         ...data,
-                        address: stakingContractAddress_14,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'claimReward',
-                        args: [false, 0]
+                        args: [0, false, 0]
                     }
                     const preparedData = await prepareWriteContract(data)
                     const writeData = await writeContract(preparedData)
@@ -221,10 +221,10 @@ export default function StakingPage() {
                 } else if (stakedAmountPerUser_28 > 0 && poolOption === 28) {
                     data = {
                         ...data,
-                        address: stakingContractAddress_28,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'claimReward',
-                        args: [false, 0]
+                        args: [1, false, 0]
                     }
                     const preparedData = await prepareWriteContract(data)
                     const writeData = await writeContract(preparedData)
@@ -242,10 +242,10 @@ export default function StakingPage() {
                 } else if (stakedAmountPerUser_56 > 0 && poolOption === 56) {
                     data = {
                         ...data,
-                        address: stakingContractAddress_56,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'claimReward',
-                        args: [false, 0]
+                        args: [2, false, 0]
                     }
                     const preparedData = await prepareWriteContract(data)
                     const writeData = await writeContract(preparedData)
@@ -264,9 +264,7 @@ export default function StakingPage() {
             }
         } catch (error) {
             toast.error("Error! Something went wrong.");
-            console.log(error);
         }
-        // handleClickOutside();
         setShowButtonList_14(false);
         setShowButtonList_28(false);
         setShowButtonList_56(false);
@@ -277,9 +275,10 @@ export default function StakingPage() {
             if (stakedAmountPerUser_14 > 0 && poolOption === 14) {
                 data = {
                     ...data,
-                    address: tokenStakingContractAddress_14,
+                    address: tokenStakingContractAddress,
                     abi: tokenStakingContractABI,
                     functionName: 'claimRewards',
+                    args: [0]
                 }
                 const preparedData = await prepareWriteContract(data)
                 const writeData = await writeContract(preparedData)
@@ -297,9 +296,10 @@ export default function StakingPage() {
             } else if (stakedAmountPerUser_28 > 0 && poolOption === 28) {
                 data = {
                     ...data,
-                    address: tokenStakingContractAddress_28,
+                    address: tokenStakingContractAddress,
                     abi: tokenStakingContractABI,
                     functionName: 'claimRewards',
+                    args: [1]
                 }
                 const preparedData = await prepareWriteContract(data)
                 const writeData = await writeContract(preparedData)
@@ -317,9 +317,10 @@ export default function StakingPage() {
             } else if (stakedAmountPerUser_56 > 0 && poolOption === 56) {
                 data = {
                     ...data,
-                    address: tokenStakingContractAddress_56,
+                    address: tokenStakingContractAddress,
                     abi: tokenStakingContractABI,
                     functionName: 'claimRewards',
+                    args: [2]
                 }
                 const preparedData = await prepareWriteContract(data)
                 const writeData = await writeContract(preparedData)
@@ -339,7 +340,6 @@ export default function StakingPage() {
             toast.error("Error! Something went wrong.");
             console.log(error);
         }
-        // handleClickOutside();
         setShowButtonList_14(false);
         setShowButtonList_28(false);
         setShowButtonList_56(false);
@@ -350,10 +350,10 @@ export default function StakingPage() {
             if (stakedAmountPerUser_14 > 0 && poolOption === 14) {
                 data = {
                     ...data,
-                    address: stakingContractAddress_14,
+                    address: stakingContractAddress,
                     abi: StakingContractABI,
                     functionName: 'unstake',
-                    args: [parseUnits(stakedAmountPerUser_14.toString(), global.CHIBA_TOKEN.decimals)]
+                    args: [0, parseUnits(stakedAmountPerUser_14.toString(), global.CHIBA_TOKEN.decimals)]
                 }
                 const preparedData = await prepareWriteContract(data)
                 const writeData = await writeContract(preparedData)
@@ -371,10 +371,10 @@ export default function StakingPage() {
             } else if (stakedAmountPerUser_28 > 0 && poolOption === 28) {
                 data = {
                     ...data,
-                    address: stakingContractAddress_28,
+                    address: stakingContractAddress,
                     abi: StakingContractABI,
                     functionName: 'unstake',
-                    args: [parseUnits(stakedAmountPerUser_28.toString(), global.CHIBA_TOKEN.decimals)]
+                    args: [1, parseUnits(stakedAmountPerUser_28.toString(), global.CHIBA_TOKEN.decimals)]
                 }
                 const preparedData = await prepareWriteContract(data)
                 const writeData = await writeContract(preparedData)
@@ -392,10 +392,10 @@ export default function StakingPage() {
             } else if (stakedAmountPerUser_56 > 0 && poolOption === 56) {
                 data = {
                     ...data,
-                    address: stakingContractAddress_56,
+                    address: stakingContractAddress,
                     abi: StakingContractABI,
                     functionName: 'unstake',
-                    args: [parseUnits(stakedAmountPerUser_56.toString(), global.CHIBA_TOKEN.decimals)]
+                    args: [2, parseUnits(stakedAmountPerUser_56.toString(), global.CHIBA_TOKEN.decimals)]
                 }
                 const preparedData = await prepareWriteContract(data)
                 const writeData = await writeContract(preparedData)

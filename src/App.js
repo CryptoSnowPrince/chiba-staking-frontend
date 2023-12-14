@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import StakingPage from "./pages/ico/StakingPage";
+import StakingPage from "./pages/StakingPage";
 // import '../src/pages/ico/index.css'
 
 const renderLoader = () => (
@@ -26,14 +26,9 @@ function App() {
         ready ? (
           <div className="App" >
             <Router>
-              {/* <MainLayout> */}
-                {/* <Suspense fallback={renderLoader()}> */}
-                  <Routes>
-                    {/* <Route path="/" element={<IcoPage />} /> */}
-                    <Route path="/" element={<StakingPage />} />
-                  </Routes>
-                {/* </Suspense> */}
-              {/* </MainLayout> */}
+              <Routes>
+                <Route path="/" element={<StakingPage />} />
+              </Routes>
               <ToastContainer pauseOnFocusLoss={true} position="top-right" autoClose={3000} toastClassName={'bg-gradient-to-r from-blue-400 via-pink-300 to-blue-400'} />
             </Router>
           </div>

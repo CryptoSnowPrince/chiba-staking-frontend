@@ -3,13 +3,14 @@ import { Dialog, Transition } from '@headlessui/react'
 import chibaIco from "../assets/img/chiba.png";
 import clsx from 'clsx';
 import { global } from "../config/global";
-import StakingContractABI from "../assets/abi/stakingContract.json";
-import chibaTokenContractABI from "../assets/abi/chibaTokenContract.json";
 import { formatUnits, parseUnits } from 'viem';
 import { useAccount } from 'wagmi';
 import { writeContract, prepareWriteContract, waitForTransaction } from "@wagmi/core"
 import { multicall } from '@wagmi/core';
 import { toast } from "react-toastify";
+import StakingContractABI from "../assets/abi/stakingContract.json";
+import chibaTokenContractABI from "../assets/abi/chibaTokenContract.json";
+import { staticConfig } from "../components/static";
 
 const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance }) => {
     // console.log(stakeModalOption)
@@ -17,18 +18,13 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
     const [modalOption, setModalOption] = useState(stakeModalOption);
     const [stakeAmount, setStakeAmount] = useState();
     const [approved, setApproved] = useState(true);
-    
+
     const cancelButtonRef = useRef(null)
-    
+
     const { address } = useAccount()
 
     const chibaTokenContractAddress = global.CHIBA_TOKEN.address;
-    const stakingContractAddress_14 = global.STAKING_CONTRACTS.Testnet_14;
-    // const tokenStakingContractAddress_14 = global.STAKING_EXTENSION_CONTRACTS.Testnet_14;
-    const stakingContractAddress_28 = global.STAKING_CONTRACTS.Testnet_28;
-    // const tokenStakingContractAddress_28 = global.STAKING_EXTENSION_CONTRACTS.Testnet_28;
-    const stakingContractAddress_56 = global.STAKING_CONTRACTS.Testnet_56;
-    // const tokenStakingContractAddress_56 = global.STAKING_EXTENSION_CONTRACTS.Testnet_56;
+    const stakingContractAddress = global.STAKING_CONTRACTS;
     const ChibaDecimals = global.CHIBA_TOKEN.decimals;
 
     const contracts = [
@@ -36,19 +32,7 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
             address: chibaTokenContractAddress,
             abi: chibaTokenContractABI,
             functionName: 'allowance',
-            args: [address, stakingContractAddress_14]
-        },
-        {
-            address: chibaTokenContractAddress,
-            abi: chibaTokenContractABI,
-            functionName: 'allowance',
-            args: [address, stakingContractAddress_28]
-        },
-        {
-            address: chibaTokenContractAddress,
-            abi: chibaTokenContractABI,
-            functionName: 'allowance',
-            args: [address, stakingContractAddress_56]
+            args: [address, stakingContractAddress]
         },
     ]
 
@@ -60,109 +44,43 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
         return _data;
     }
 
-    let dataChiba = {
-        chainId: global.chain.id,
-        address: chibaTokenContractAddress,
-        abi: chibaTokenContractABI,
-    }
-
     let dataStaking = {
         chainId: global.chain.id,
     }
 
     const handleApprove = async () => {
         try {
-            console.log(modalOption)
-            dataChiba = {
-                ...dataChiba,
+            let dataApprove = {
+                chainId: global.chain.id,
                 address: chibaTokenContractAddress,
                 abi: chibaTokenContractABI
             }
-            if (modalOption === 15) {
-                try {
-                    dataChiba = {
-                        ...dataChiba,
-                        functionName: 'increaseAllowance',
-                        args: [stakingContractAddress_14, parseUnits(stakeAmount.toString(), ChibaDecimals)],
-                    }
-                } catch (error) {
-                    dataChiba = {
-                        ...dataChiba,
-                        functionName: 'approve',
-                        args: [stakingContractAddress_14, parseUnits(stakeAmount.toString(), ChibaDecimals)],
-                    }
+            try {
+                dataApprove = {
+                    ...dataApprove,
+                    functionName: 'increaseAllowance',
+                    args: [stakingContractAddress, staticConfig.MAX_UINT256_HALF],
                 }
-                const preparedData = await prepareWriteContract(dataChiba)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
+            } catch (error) {
+                dataApprove = {
+                    ...dataApprove,
+                    functionName: 'approve',
+                    args: [stakingContractAddress, staticConfig.MAX_UINT256],
+                }
+            }
+            const preparedData = await prepareWriteContract(dataApprove)
+            const writeData = await writeContract(preparedData)
+            const txPendingData = waitForTransaction(writeData)
+            toast.promise(txPendingData, {
+                pending: "Waiting for pending... 👌",
+            });
 
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Approved! 👌`)
-                    setApproved(true)
-                } else {
-                    toast.error("Error! Approving is failed.");
-                }
-            } else if (modalOption === 40) {
-                try {
-                    dataChiba = {
-                        ...dataChiba,
-                        functionName: 'increaseAllowance',
-                        args: [stakingContractAddress_28, parseUnits(stakeAmount.toString(), ChibaDecimals)],
-                    }
-                } catch (error) {
-                    dataChiba = {
-                        ...dataChiba,
-                        functionName: 'approve',
-                        args: [stakingContractAddress_28, parseUnits(stakeAmount.toString(), ChibaDecimals)],
-                    }
-                }
-                const preparedData = await prepareWriteContract(dataChiba)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Approved! 👌`)
-                    setApproved(true)
-                    // setStakeAmount()
-                } else {
-                    toast.error("Error! Approving is failed.");
-                }
-            } else if (modalOption === 60) {
-                try {
-                    dataChiba = {
-                        ...dataChiba,
-                        functionName: 'increaseAllowance',
-                        args: [stakingContractAddress_56, parseUnits(stakeAmount.toString(), ChibaDecimals)],
-                    }
-                } catch (error) {
-                    dataChiba = {
-                        ...dataChiba,
-                        functionName: 'approve',
-                        args: [stakingContractAddress_56, parseUnits(stakeAmount.toString(), ChibaDecimals)],
-                    }
-                }
-                const preparedData = await prepareWriteContract(dataChiba)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Approved! 👌`)
-                    setApproved(true)
-                } else {
-                    toast.error("Error! Approving is failed.");
-                }
+            const txData = await txPendingData;
+            if (txData && txData.status === "success") {
+                toast.success(`Successfully Approved! 👌`)
+                setApproved(true)
+            } else {
+                toast.error("Error! Approving is failed.");
             }
         } catch (error) {
             console.log(error);
@@ -171,20 +89,17 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
 
     const handleStake = async () => {
         try {
-            console.log(modalOption)
             const _data = await getAllowance();
-            const allowanceAmount_14 = _data[0].status === "success" ? parseFloat(formatUnits(_data[0].result, ChibaDecimals)) : 0
-            const allowanceAmount_28 = _data[1].status === "success" ? parseFloat(formatUnits(_data[1].result, ChibaDecimals)) : 0
-            const allowanceAmount_56 = _data[2].status === "success" ? parseFloat(formatUnits(_data[2].result, ChibaDecimals)) : 0
+            const allowanceAmount = _data[0].status === "success" ? parseFloat(formatUnits(_data[0].result, ChibaDecimals)) : 0
 
-            if (modalOption === 15) {
-                if (allowanceAmount_14 >= stakeAmount) {
+            if (allowanceAmount >= stakeAmount) {
+                if (modalOption === 15) {
                     dataStaking = {
                         ...dataStaking,
-                        address: stakingContractAddress_14,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'stake',
-                        args: [parseUnits(stakeAmount.toString(), ChibaDecimals)]
+                        args: [0, parseUnits(stakeAmount.toString(), ChibaDecimals)]
                     }
                     const preparedData = await prepareWriteContract(dataStaking)
                     const writeData = await writeContract(preparedData)
@@ -200,19 +115,13 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
                     } else {
                         toast.error("Error! Staking is failed.");
                     }
-                } else {
-                    setApproved(false);
-                    // setBtnMsg("Approve");
-                    // return
-                }
-            } else if (modalOption === 40) {
-                if (allowanceAmount_28 >= stakeAmount) {
+                } else if (modalOption === 40) {
                     dataStaking = {
                         ...dataStaking,
-                        address: stakingContractAddress_28,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'stake',
-                        args: [parseUnits(stakeAmount.toString(), ChibaDecimals)]
+                        args: [1, parseUnits(stakeAmount.toString(), ChibaDecimals)]
                     }
                     const preparedData = await prepareWriteContract(dataStaking)
                     const writeData = await writeContract(preparedData)
@@ -228,20 +137,13 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
                     } else {
                         toast.error("Error! Staking is failed.");
                     }
-                } else {
-                    setApproved(false);
-                    // setBtnMsg("Approve");
-                    // await handleApprove();
-                    return
-                }
-            } else if (modalOption === 60) {
-                if (allowanceAmount_56 >= stakeAmount) {
+                } else if (modalOption === 60) {
                     dataStaking = {
                         ...dataStaking,
-                        address: stakingContractAddress_56,
+                        address: stakingContractAddress,
                         abi: StakingContractABI,
                         functionName: 'stake',
-                        args: [parseUnits(stakeAmount.toString(), ChibaDecimals)]
+                        args: [2, parseUnits(stakeAmount.toString(), ChibaDecimals)]
                     }
                     const preparedData = await prepareWriteContract(dataStaking)
                     const writeData = await writeContract(preparedData)
@@ -257,15 +159,14 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
                     } else {
                         toast.error("Error! Staking is failed.");
                     }
-                } else {
-                    setApproved(false);
-                    // setBtnMsg("Approve");
-                    return;
                 }
+            } else {
+                setApproved(false);
+                // toast.error("Error! Staking is failed.");
+                return;
             }
         } catch (error) {
             toast.error("Error! Something went wrong.");
-            console.log(error);
         }
     }
 
@@ -325,7 +226,7 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
                                             <div className="mt-4">
                                                 <div className="flex flex-col gap-5">
                                                     <div className="flex lg:flex-row flex-col lg:items-center item-start gap-5 w-full">
-                                                        <button onClick={() => {setModalOption(15)}} className={clsx("md:p-5 p-2.5 flex flex-col items-center justify-center w-full rounded-2xl gap-1.5 border border-gray-1 border-opacity-30", modalOption === 15 ? "bg-violet-1 text-white" : "bg-violet-4 text-violet-2")}>
+                                                        <button onClick={() => { setModalOption(15) }} className={clsx("md:p-5 p-2.5 flex flex-col items-center justify-center w-full rounded-2xl gap-1.5 border border-gray-1 border-opacity-30", modalOption === 15 ? "bg-violet-1 text-white" : "bg-violet-4 text-violet-2")}>
                                                             <h1 className="text-base font-bold">14 Day Lockup</h1>
                                                             <h2><span className="text-xl font-bold">15%</span><span className="ml-2 text-sm font-bold">APR</span></h2>
                                                         </button>

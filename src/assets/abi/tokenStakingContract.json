@@ -12,9 +12,9 @@
                 "type": "address"
             },
             {
-                "internalType": "uint256",
-                "name": "_fixedAPR",
-                "type": "uint256"
+                "internalType": "uint8[]",
+                "name": "_newAPR",
+                "type": "uint8[]"
             }
         ],
         "stateMutability": "nonpayable",
@@ -23,6 +23,12 @@
     {
         "anonymous": false,
         "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "indexed": true,
                 "internalType": "address",
@@ -42,6 +48,12 @@
     {
         "anonymous": false,
         "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "indexed": true,
                 "internalType": "address",
@@ -100,6 +112,12 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
+            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "owner",
@@ -121,6 +139,11 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "name": "_userStartTime",
@@ -136,6 +159,11 @@
     },
     {
         "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "internalType": "address",
                 "name": "stakeHolder",
@@ -154,20 +182,32 @@
         "type": "function"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            }
+        ],
         "name": "claimRewards",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "fixedAPR",
-        "outputs": [
+        "inputs": [
             {
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "name": "fixedAPR",
+        "outputs": [
+            {
+                "internalType": "uint8",
+                "name": "",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",
@@ -209,6 +249,11 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
+            {
                 "internalType": "address",
                 "name": "stakeHolder",
                 "type": "address"
@@ -228,6 +273,11 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
+            {
                 "internalType": "uint8",
                 "name": "_newAPR",
                 "type": "uint8"
@@ -240,6 +290,11 @@
     },
     {
         "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            },
             {
                 "internalType": "address",
                 "name": "wallet",
@@ -267,6 +322,11 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "name": "staked",
@@ -294,7 +354,13 @@
         "type": "function"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pid",
+                "type": "uint256"
+            }
+        ],
         "name": "totalDeposited",
         "outputs": [
             {
