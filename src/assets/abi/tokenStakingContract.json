@@ -160,6 +160,19 @@
     {
         "inputs": [
             {
+                "internalType": "uint8",
+                "name": "_addedAPR",
+                "type": "uint8"
+            }
+        ],
+        "name": "addTokenPool",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "pid",
                 "type": "uint256"

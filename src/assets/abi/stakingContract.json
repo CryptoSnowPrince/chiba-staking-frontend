@@ -226,6 +226,11 @@
                 "internalType": "uint256",
                 "name": "_percentage",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "_addedAPR",
+                "type": "uint8"
             }
         ],
         "name": "createPool",
