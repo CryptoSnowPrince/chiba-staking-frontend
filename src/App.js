@@ -29,7 +29,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<StakingPage />} />
               </Routes>
-              <ToastContainer pauseOnFocusLoss={true} position="top-right" autoClose={3000} toastClassName={'bg-gradient-to-r from-blue-400 via-pink-300 to-blue-400'} />
+              <ToastContainer pauseOnFocusLoss={true} position="top-right" autoClose={3000} toastClassName={'bg-blue-00 text-white'} />
             </Router>
           </div>
         ) : (

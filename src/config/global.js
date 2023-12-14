@@ -5,12 +5,12 @@ export const IS_PRODUCT_MODE = false // TODO
 
 export const staking_contract_address = { // TODO ethereum Mainnet
     mainnet: "",
-    testnet: "0xC2637761F06eFca123fF09F2D3FbB4FAe6977189",
+    testnet: "0xCe61652B4e49A5D6eDDFEC8b6ddC551A96F99292",
 };
 
 export const token_staking_contract_address = { // TODO ethereum Mainnet
     mainnet: "",
-    testnet: "0x3DEE7C4013D97D2F40472A133c5ab451b02B7630",
+    testnet: "0x12b85c2683E4fB4535be30f48AC7bA2C184569d6",
 };
 
 export const chibaToken_mainnet = {

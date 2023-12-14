@@ -13,7 +13,9 @@ import { staticConfig } from "./components/static";
 
 const WalletTheme = {
   colors: {
-    modalBackground: 'linear-gradient(to right, #4250b5, #8b2eb0, #e15897)',
+    modalBackground: 'linear-gradient(to right, #3541FD, #3692FC, #3541FD)',
+    // modalBackground: 'linear-gradient(to right, #4250b5, #8b2eb0, #e15897)',
+    // modalBackground: 'bg-color: #005AFF',
     modalText: 'white'
   },
 }
