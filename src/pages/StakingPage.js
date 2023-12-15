@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import StakingContractABI from "../assets/abi/stakingContract.json";
 import tokenStakingContractABI from "../assets/abi/tokenStakingContract.json";
 import IUniswapV2Router01ContractABI from "../assets/abi/IUniswapV2Router01ContractABI.json";
-import { parseUnits, formatUnits, etherUnits } from 'viem';
+import { parseUnits, formatUnits } from 'viem';
 import { writeContract, prepareWriteContract, waitForTransaction } from "@wagmi/core"
 import CommandBtnList from '../components/CommandBtnList';
 import { useContractRead } from 'wagmi';
@@ -88,7 +88,7 @@ export default function StakingPage() {
             setStakedPercent_28(parseFloat((Number(stakedAmountPerUser_28) * 100) / Number(totalStakedAmount_28)).toFixed(6));
         if (stakedAmountPerUser_56 && totalStakedAmount_56 !== 0)
             setStakedPercent_56(parseFloat((Number(stakedAmountPerUser_56) * 100) / Number(totalStakedAmount_56)).toFixed(6));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stakedAmountPerUser_14, stakedAmountPerUser_28, stakedAmountPerUser_56])
 
     // Amount of CHIBA token to swap with earned WETH as reward

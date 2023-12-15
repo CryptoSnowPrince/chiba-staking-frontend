@@ -40,12 +40,11 @@ const StakingOptionModal = (props) => {
 
     useEffect(() => {
         if (pending) {
-            setBtnMsg("Pending")
+            setBtnMsg("Pending...")
             setErrMsg("Please wait! Pending...")
-            setBtnDisabled(true)
+            // setBtnDisabled(true)
             return
         }
-        console.log('Default Gas is:', getDefaultGas());
         if (props.ethBalance < getDefaultGas()) {
             setBtnMsg("Insufficient ETH")
             setErrMsg("Insufficient ETH for gasfee! Please buy more ETH!")
@@ -55,19 +54,19 @@ const StakingOptionModal = (props) => {
         if (!stakeAmount || Number(stakeAmount) < 0) {
             setBtnMsg("Enter amount")
             setErrMsg("Please enter valid CHIBA token amount!")
-            setBtnDisabled(true)
+            // setBtnDisabled(true)
             return
         }
         if (Number(stakeAmount) > props.walletBalance) {
             setBtnMsg("Insufficient CHIBA")
-            // setErrMsg("Please ")
-            setBtnDisabled(true)
+            setErrMsg("Insufficient CHIBA token. Please buy more CHIBA!")
+            // setBtnDisabled(true)
             return
         }
         if (props.allowance < Number(stakeAmount)) {
             setBtnMsg("Approve")
             setErrMsg("Insufficient allowance amount. Please increase allowance amount!");
-            setBtnDisabled(false)
+            // setBtnDisabled(false)
             return
         }
         setBtnMsg("Stake")
@@ -194,8 +193,6 @@ const StakingOptionModal = (props) => {
     }
 
     const handleBtn = async () => {
-        // if (btnMsg === "Insufficient ETH")
-        //     toast.warn(errMsg);
         if (btnMsg === "Stake") {
             setPending(true);
             await handleStake();

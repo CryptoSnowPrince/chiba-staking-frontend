@@ -186,7 +186,6 @@ export function useStakingContractStatus() {
         };
         fetchData();
     }, [address, refetch])
-    console.log('data1 is:', data)
 
     return data
 }
