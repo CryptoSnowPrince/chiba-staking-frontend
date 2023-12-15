@@ -7054,3 +7054,9 @@ body.swal2-toast-shown .swal2-container.swal2-bottom-right {
     background-color: rgb(53 103 253 / var(--tw-bg-opacity));
     border: 1px solid white;
 }
+
+.toast-theme {
+    --tw-bg-opacity: 0.9;
+    background-color: rgb(30 21 50 / var(--tw-bg-opacity));
+    border: 0.5px solid white;
+}

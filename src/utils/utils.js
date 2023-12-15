@@ -90,11 +90,6 @@ export function delayMs(ms) {
 }
 
 export function isSupportedChain(chain) {
-    if (!chain) return false
-
+    if (!chain) return false;
     return global.chain.id === chain.id;
 }
-
-export const ICO_BEFORE = `COMING SOON!`
-export const ICO_NOW = `NOW!`
-export const ICO_AFTER = `ENDED!`

@@ -3,7 +3,7 @@ import StakingContractABI from "../assets/abi/stakingContract.json";
 import tokenStakingContractABI from "../assets/abi/tokenStakingContract.json";
 import chibaTokenContractABI from "../assets/abi/chibaTokenContract.json";
 import { useAccount } from "wagmi";
-import { multicall } from '@wagmi/core';
+import { multicall, fetchBalance } from '@wagmi/core';
 import { global } from "../config/global";
 import { formatUnits } from "viem";
 
@@ -15,25 +15,21 @@ export function useStakingContractStatus() {
         stakedAmountPerUser_14: 0,    // staked amount per user
         stakedTimePerUser_14: 0,      // staked time per user
         unClaimed_14: 0,              // getUnpaid of stakingcontract_14
-        // EthExcluded_14: 0,         // rewards read function of contract
-        // EthRealised_14: 0,
         tokenRewarded_14: 0,          // RewardOf read function of TokenStakingPool contract
         totalEthRewarded_28: 0,       // Sum of totalRewards
         totalStakedAmount_28: 0,      // totalSharesDeposited of contract
         stakedAmountPerUser_28: 0,    // staked amount per user
         stakedTimePerUser_28: 0,      // staked time per user
         unClaimed_28: 0,              // getUnpaid of stakingcontract_28
-        // EthExcluded_28: 0,            // rewards read function of contract
-        // EthRealised_28: 0,
         tokenRewarded_28: 0,          // RewardOf read function of TokenStakingPool contract
         totalEthRewarded_56: 0,       // Sum of totalRewards
         totalStakedAmount_56: 0,      // totalSharesDeposited of contract
         stakedAmountPerUser_56: 0,    // staked amount per user
         stakedTimePerUser_56: 0,      // staked time per user
         unClaimed_56: 0,              // getUnpaid of stakingcontract_56
-        // EthExcluded_56: 0,            // rewards read function of contract
-        // EthRealised_56: 0,
         tokenRewarded_56: 0,          // RewardOf read function of TokenStakingPool contract
+        ethBalance: 0,
+        allowance: 0
     })
     const { address } = useAccount();
 
@@ -142,12 +138,20 @@ export function useStakingContractStatus() {
                         functionName: 'rewardOf',
                         args: [2, address]
                     },
+                    {
+                        address: chibaTokenContractAddress,
+                        abi: chibaTokenContractABI,
+                        functionName: 'allowance',
+                        args: [address, stakingContractAddress]
+                    },
                 ]
 
                 const _data = await multicall({
                     chainId: global.chain.id,
                     contracts
                 })
+
+                const ethBalance = address ? parseFloat((await fetchBalance({ address })).formatted) : 0
 
                 console.log(_data, "data is:");
                 setData({
@@ -173,6 +177,8 @@ export function useStakingContractStatus() {
                     stakedTimePerUser_56: _data[10].status === "success" ? Number(_data[10].result[1]) : 0,
                     unClaimed_56: _data[11].status === "success" ? parseFloat(formatUnits(_data[11].result, global.EthDecimals)).toFixed(10) : 0,
                     tokenRewarded_56: _data[12].status === "success" ? parseFloat(formatUnits(_data[12].result, global.CHIBA_TOKEN.decimals)).toFixed(5) : 0,
+                    allowance: _data[13].status ==="success" ? parseFloat(formatUnits(_data[13].result, global.CHIBA_TOKEN.decimals)).toFixed(2) : 0,
+                    ethBalance: ethBalance
                 })
             } catch (error) {
                 console.log('useStakingContractStatus err', error)
@@ -180,6 +186,7 @@ export function useStakingContractStatus() {
         };
         fetchData();
     }, [address, refetch])
+    console.log('data1 is:', data)
 
     return data
 }

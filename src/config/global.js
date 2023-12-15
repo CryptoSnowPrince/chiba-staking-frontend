@@ -34,7 +34,7 @@ export const global = {
     STAKING_EXTENSION_CONTRACTS: IS_PRODUCT_MODE ? token_staking_contract_address.mainnet : token_staking_contract_address.testnet,
     CHIBA_TOKEN: IS_PRODUCT_MODE ? chibaToken_mainnet : chibaToken_testnet,
     chain: IS_PRODUCT_MODE ? mainnet : goerli,
-    defaultGas: IS_PRODUCT_MODE ? 45 : 0.1,
+    defaultGas: IS_PRODUCT_MODE ? 0.0005 : 0.0004,
     REFETCH_INTERVAL: 30000,
     REFETCH_SECOND: 1000,
     EthDecimals: 18,

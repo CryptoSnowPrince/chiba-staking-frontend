@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useRef, useState, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import chibaIco from "../assets/img/chiba.png";
@@ -6,47 +7,72 @@ import { global } from "../config/global";
 import { formatUnits, parseUnits } from 'viem';
 import { useAccount } from 'wagmi';
 import { writeContract, prepareWriteContract, waitForTransaction } from "@wagmi/core"
-import { multicall } from '@wagmi/core';
 import { toast } from "react-toastify";
 import StakingContractABI from "../assets/abi/stakingContract.json";
 import chibaTokenContractABI from "../assets/abi/chibaTokenContract.json";
 import { staticConfig } from "../components/static";
+import { getDefaultGas } from "../utils/utils"
 
-const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance }) => {
-    // console.log(stakeModalOption)
+const StakingOptionModal = (props) => {
     const [open, setOpen] = useState(false)
-    const [modalOption, setModalOption] = useState(stakeModalOption);
+    const [modalOption, setModalOption] = useState(props.stakeModalOption);
     const [stakeAmount, setStakeAmount] = useState();
-    const [approved, setApproved] = useState(true);
+    // const [approved, setApproved] = useState(true);
+    const [btnMsg, setBtnMsg] = useState("Stake");
+    const [errMsg, setErrMsg] = useState(false);
+    const [pending, setPending] = useState(false);
+    const [btnDisabled, setBtnDisabled] =useState(false);
 
     const cancelButtonRef = useRef(null)
-
-    const { address } = useAccount()
 
     const chibaTokenContractAddress = global.CHIBA_TOKEN.address;
     const stakingContractAddress = global.STAKING_CONTRACTS;
     const ChibaDecimals = global.CHIBA_TOKEN.decimals;
 
-    const contracts = [
-        {
-            address: chibaTokenContractAddress,
-            abi: chibaTokenContractABI,
-            functionName: 'allowance',
-            args: [address, stakingContractAddress]
-        },
-    ]
-
-    const getAllowance = async () => {
-        const _data = await multicall({
-            chainId: global.chain.id,
-            contracts
-        })
-        return _data;
-    }
-
     let dataStaking = {
         chainId: global.chain.id,
     }
+
+    useEffect(() => {
+        setOpen(props.showOpen);
+        // setModalOption()
+    }, [props.showOpen])
+
+    useEffect(() => {
+        if (pending) {
+            setBtnMsg("Pending")
+            setErrMsg("Please wait! Pending...")
+            setBtnDisabled(true)
+            return
+        }
+        console.log('Default Gas is:', getDefaultGas());
+        if (props.ethBalance < getDefaultGas()) {
+            setBtnMsg("Insufficient ETH")
+            setErrMsg("Insufficient ETH for gasfee! Please buy more ETH!")
+            // setBtnDisabled(true)
+            return
+        }
+        if (!stakeAmount || Number(stakeAmount) < 0) {
+            setBtnMsg("Enter amount")
+            setErrMsg("Please enter valid CHIBA token amount!")
+            setBtnDisabled(true)
+            return
+        }
+        if (Number(stakeAmount) > props.walletBalance) {
+            setBtnMsg("Insufficient CHIBA")
+            // setErrMsg("Please ")
+            setBtnDisabled(true)
+            return
+        }
+        if (props.allowance < Number(stakeAmount)) {
+            setBtnMsg("Approve")
+            setErrMsg("Insufficient allowance amount. Please increase allowance amount!");
+            setBtnDisabled(false)
+            return
+        }
+        setBtnMsg("Stake")
+        setBtnDisabled(false)
+    }, [stakeAmount, pending, props.amount, props.ethBalance, props.allowance])
 
     const handleApprove = async () => {
         try {
@@ -78,7 +104,7 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
             const txData = await txPendingData;
             if (txData && txData.status === "success") {
                 toast.success(`Successfully Approved! 👌`)
-                setApproved(true)
+                // setApproved(true)
             } else {
                 toast.error("Error! Approving is failed.");
             }
@@ -89,10 +115,7 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
 
     const handleStake = async () => {
         try {
-            const _data = await getAllowance();
-            const allowanceAmount = _data[0].status === "success" ? parseFloat(formatUnits(_data[0].result, ChibaDecimals)) : 0
-
-            if (allowanceAmount >= stakeAmount) {
+            // if (props.allowance >= stakeAmount) {
                 if (modalOption === 15) {
                     dataStaking = {
                         ...dataStaking,
@@ -160,30 +183,43 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
                         toast.error("Error! Staking is failed.");
                     }
                 }
-            } else {
-                setApproved(false);
+            // } else {
+                // setApproved(false);
                 // toast.error("Error! Staking is failed.");
-                return;
-            }
+                // return;
+            // }
         } catch (error) {
             toast.error("Error! Something went wrong.");
         }
     }
 
-    useEffect(() => {
-        setOpen(showOpen);
-        // setModalOption()
-    }, [showOpen])
+    const handleBtn = async () => {
+        // if (btnMsg === "Insufficient ETH")
+        //     toast.warn(errMsg);
+        if (btnMsg === "Stake") {
+            setPending(true);
+            await handleStake();
+            setPending(false)
+            return
+        }
+        if (btnMsg === "Approve") {
+            setPending(true)
+            await handleApprove();
+            setPending(false);
+            return
+        }
+        toast.warn(errMsg);
+    }
 
     const handleClose = () => {
-        setApproved(true);
+        // setApproved(true);
         setStakeAmount();
-        setModalOption(stakeModalOption);
-        onClose();
+        setModalOption(props.stakeModalOption);
+        props.onClose();
     }
 
     const handleChange = (val) => {
-        setApproved(true)
+        // setApproved(true)
         setStakeAmount(val)
     }
 
@@ -243,21 +279,20 @@ const StakingOptionModal = ({ showOpen, onClose, stakeModalOption, walletBalance
                                                         <div className="relative">
                                                             {/* <input type="number" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="Enter Amount" className="bg-violet-7 w-full rounded text-white text-base py-4 pl-5 pr-28 outline-none [&amp;::-webkit-inner-spin-button]:appearance-none" /> */}
                                                             <input type="number" value={stakeAmount} onChange={(e) => handleChange(e.target.value)} placeholder="Enter Amount" className="bg-violet-7 w-full rounded text-white text-base py-4 pl-5 pr-28 outline-none [&amp;::-webkit-inner-spin-button]:appearance-none" />
-                                                            <button onClick={() => setStakeAmount(walletBalance)} className="font-medium text-center text-white px-4 py-2 text-sm rounded bg-violet-1 hover:bg-opacity-80 absolute right-5 top-3">Max</button>
+                                                            <button onClick={() => setStakeAmount(props.walletBalance)} className="font-medium text-center text-white px-4 py-2 text-sm rounded bg-violet-1 hover:bg-opacity-80 absolute right-5 top-3">Max</button>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <img src={chibaIco} alt="" className="lg:h-12 lg:w-14 md:h-12 md:w-14 w-10 h-10" />
                                                             <h1 className="text-white text-opacity-75 text-sm font-medium">$CHIBA Balance: </h1>
-                                                            <h1 className="text-white text-sm font-medium">{walletBalance} $CHIBA</h1>
+                                                            <h1 className="text-white text-sm font-medium">{props.walletBalance} $CHIBA</h1>
                                                         </div>
                                                     </div>
                                                     <p className="text-sm font-medium text-white text-opacity-75"> You are staking {stakeAmount} $CHIBA tokens. </p>
-                                                    <button onClick={approved === true ? handleStake : handleApprove}
-                                                        className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full", (Number(stakeAmount) <= Number(walletBalance) && Number(stakeAmount) > 0) ? "connect-button" : "connect-button-disable")}
-                                                        disabled={(Number(stakeAmount) <= Number(walletBalance) && Number(stakeAmount) > 0) ? false : true}>
-                                                        {approved ? "Stake" : "Approve"}
+                                                    <button onClick={handleBtn}
+                                                        className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full", btnDisabled ? "connect-button-disable" : "connect-button")}
+                                                        disabled={btnDisabled ? true : false}>
+                                                        {btnMsg}
                                                     </button>
-
                                                 </div>
                                             </div>
                                         </div>
