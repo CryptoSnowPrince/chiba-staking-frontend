@@ -9,19 +9,14 @@ import chibaIco from "../assets/img/chiba.png"
 import giftIco from "../assets/img/gift.png"
 import { global } from '../config/global';
 import { useAccount } from "wagmi";
-import { toast } from "react-toastify";
-import StakingContractABI from "../assets/abi/stakingContract.json";
-import tokenStakingContractABI from "../assets/abi/tokenStakingContract.json";
 import IUniswapV2Router01ContractABI from "../assets/abi/IUniswapV2Router01ContractABI.json";
 import { parseUnits, formatUnits } from 'viem';
-import { writeContract, prepareWriteContract, waitForTransaction } from "@wagmi/core"
 import CommandBtnList from '../components/CommandBtnList';
 import { useContractRead } from 'wagmi';
 
-
 export default function StakingPage() {
     const { address } = useAccount();
-    // const [refresh, setRefresh] = useState(false)
+    const [refresh, setRefresh] = useState(false)
 
     const [showButtonList_14, setShowButtonList_14] = useState(false);
     const [showButtonList_28, setShowButtonList_28] = useState(false);
@@ -30,6 +25,11 @@ export default function StakingPage() {
     const [stakedPercent_14, setStakedPercent_14] = useState(0);
     const [stakedPercent_28, setStakedPercent_28] = useState(0);
     const [stakedPercent_56, setStakedPercent_56] = useState(0);
+
+    const [compoundPending, setCompoundPending] = useState(false);
+    const [claimEthPending, setClaimEthPending] = useState(false);
+    const [claimChibaPending, setClaimChibaPending] = useState(false);
+    const [unstakePending, setUnstakePending] = useState(false);
 
     const [walletConnected, setWalletConnected] = useState(false)
 
@@ -58,21 +58,14 @@ export default function StakingPage() {
         tokenRewarded_56,          // Earned $CHIBA token amount
         allowance,
         ethBalance
-    } = useStakingContractStatus()
+    } = useStakingContractStatus(refresh)
 
     const wrapperRef = useRef(null);
-    const totalEthRewarded = parseFloat(totalEthRewarded_14) + parseFloat(totalEthRewarded_28) + parseFloat(totalEthRewarded_56);
-
-    const stakingContractAddress = global.STAKING_CONTRACTS;
-    const tokenStakingContractAddress = global.STAKING_EXTENSION_CONTRACTS;
     const EthDecimals = global.EthDecimals;
     const IUniswapV2Router01Address = global.IUniswapV2Router01Address;
-
     const addresses = [global.WethContractAddress, global.CHIBA_TOKEN.address];
 
-    let data = {
-        chainId: global.chain.id,
-    }
+    const totalEthRewarded = Number(parseFloat(totalEthRewarded_14) + parseFloat(totalEthRewarded_28) + parseFloat(totalEthRewarded_56)).toFixed(5);
 
     useEffect(() => {
         document.addEventListener("click", handleClickOutside, true);
@@ -84,11 +77,17 @@ export default function StakingPage() {
     useEffect(() => {
         if (stakedAmountPerUser_14 !== 0 && totalStakedAmount_14 !== 0)
             setStakedPercent_14(parseFloat((Number(stakedAmountPerUser_14) * 100) / Number(totalStakedAmount_14)).toFixed(6));
+        else if (stakedAmountPerUser_14 === 0)
+            setStakedPercent_14(0);
         if (stakedAmountPerUser_28 !== 0 && totalStakedAmount_28 !== 0)
             setStakedPercent_28(parseFloat((Number(stakedAmountPerUser_28) * 100) / Number(totalStakedAmount_28)).toFixed(6));
+        else if (stakedAmountPerUser_28 === 0)
+            setStakedPercent_28(0);
         if (stakedAmountPerUser_56 && totalStakedAmount_56 !== 0)
             setStakedPercent_56(parseFloat((Number(stakedAmountPerUser_56) * 100) / Number(totalStakedAmount_56)).toFixed(6));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        else if (stakedAmountPerUser_56 === 0)
+            setStakedPercent_56(0);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stakedAmountPerUser_14, stakedAmountPerUser_28, stakedAmountPerUser_56])
 
     // Amount of CHIBA token to swap with earned WETH as reward
@@ -131,298 +130,6 @@ export default function StakingPage() {
         }
     };
 
-    const handleCompoundAndRelock = async (compound, poolOption) => {
-        try {
-            if (compound) {
-                if (stakedAmountPerUser_14 > 0 && poolOption === 14 && _minTokensToReceive1 > 0) {
-                    data = {
-                        ...data,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'claimReward',
-                        args: [0, true, parseUnits((_minTokensToReceive1 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
-                    }
-                    const preparedData = await prepareWriteContract(data)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Compound Claimed! 👌`)
-                    } else {
-                        toast.error("Error! Claiming is failed.");
-                    }
-                } else if (stakedAmountPerUser_28 > 0 && poolOption === 28 && _minTokensToReceive2 > 0) {
-                    data = {
-                        ...data,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'claimReward',
-                        args: [1, true, parseUnits((_minTokensToReceive2 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
-                    }
-                    const preparedData = await prepareWriteContract(data)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Compound Claimed! 👌`)
-                    } else {
-                        toast.error("Error! Claiming is failed.");
-                    }
-                } else if (stakedAmountPerUser_56 > 0 && poolOption === 56 && _minTokensToReceive3 > 0) {
-                    data = {
-                        ...data,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'claimReward',
-                        args: [2, true, parseUnits((_minTokensToReceive3 * 0.95).toString(), global.CHIBA_TOKEN.decimals)]
-                    }
-                    const preparedData = await prepareWriteContract(data)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Compound Claimed! 👌`)
-                    } else {
-                        toast.error("Error! Claiming is failed.");
-                    }
-                }
-            } else {
-                if (stakedAmountPerUser_14 > 0 && poolOption === 14) {
-                    data = {
-                        ...data,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'claimReward',
-                        args: [0, false, 0]
-                    }
-                    const preparedData = await prepareWriteContract(data)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Claimed! 👌`)
-                    } else {
-                        toast.error("Error! Claiming is failed.");
-                    }
-                } else if (stakedAmountPerUser_28 > 0 && poolOption === 28) {
-                    data = {
-                        ...data,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'claimReward',
-                        args: [1, false, 0]
-                    }
-                    const preparedData = await prepareWriteContract(data)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Claimed! 👌`)
-                    } else {
-                        toast.error("Error! Claiming is failed.");
-                    }
-                } else if (stakedAmountPerUser_56 > 0 && poolOption === 56) {
-                    data = {
-                        ...data,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'claimReward',
-                        args: [2, false, 0]
-                    }
-                    const preparedData = await prepareWriteContract(data)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Claimed! 👌`)
-                    } else {
-                        toast.error("Error! Claiming is failed.");
-                    }
-                }
-            }
-        } catch (error) {
-            toast.error("Error! Something went wrong.");
-        }
-        setShowButtonList_14(false);
-        setShowButtonList_28(false);
-        setShowButtonList_56(false);
-    }
-
-    const handleClaimChibaRewards = async (poolOption) => {
-        try {
-            if (stakedAmountPerUser_14 > 0 && poolOption === 14) {
-                data = {
-                    ...data,
-                    address: tokenStakingContractAddress,
-                    abi: tokenStakingContractABI,
-                    functionName: 'claimRewards',
-                    args: [0]
-                }
-                const preparedData = await prepareWriteContract(data)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Chiba Token Claimed! 👌`)
-                } else {
-                    toast.error("Error! Claiming is failed.");
-                }
-            } else if (stakedAmountPerUser_28 > 0 && poolOption === 28) {
-                data = {
-                    ...data,
-                    address: tokenStakingContractAddress,
-                    abi: tokenStakingContractABI,
-                    functionName: 'claimRewards',
-                    args: [1]
-                }
-                const preparedData = await prepareWriteContract(data)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Chiba Token Claimed! 👌`)
-                } else {
-                    toast.error("Error! Claiming is failed.");
-                }
-            } else if (stakedAmountPerUser_56 > 0 && poolOption === 56) {
-                data = {
-                    ...data,
-                    address: tokenStakingContractAddress,
-                    abi: tokenStakingContractABI,
-                    functionName: 'claimRewards',
-                    args: [2]
-                }
-                const preparedData = await prepareWriteContract(data)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Chiba Token Claimed! 👌`)
-                } else {
-                    toast.error("Error! Claiming is failed.");
-                }
-            }
-        } catch (error) {
-            toast.error("Error! Something went wrong.");
-            console.log(error);
-        }
-        setShowButtonList_14(false);
-        setShowButtonList_28(false);
-        setShowButtonList_56(false);
-    }
-
-    const handleUnstake = async (poolOption) => {
-        try {
-            if (stakedAmountPerUser_14 > 0 && poolOption === 14) {
-                data = {
-                    ...data,
-                    address: stakingContractAddress,
-                    abi: StakingContractABI,
-                    functionName: 'unstake',
-                    args: [0, parseUnits(stakedAmountPerUser_14.toString(), global.CHIBA_TOKEN.decimals)]
-                }
-                const preparedData = await prepareWriteContract(data)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Unstaked! 👌`)
-                } else {
-                    toast.error("Error! Unstaking is failed.");
-                }
-            } else if (stakedAmountPerUser_28 > 0 && poolOption === 28) {
-                data = {
-                    ...data,
-                    address: stakingContractAddress,
-                    abi: StakingContractABI,
-                    functionName: 'unstake',
-                    args: [1, parseUnits(stakedAmountPerUser_28.toString(), global.CHIBA_TOKEN.decimals)]
-                }
-                const preparedData = await prepareWriteContract(data)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Unstaked! 👌`)
-                } else {
-                    toast.error("Error! Unstaking is failed.");
-                }
-            } else if (stakedAmountPerUser_56 > 0 && poolOption === 56) {
-                data = {
-                    ...data,
-                    address: stakingContractAddress,
-                    abi: StakingContractABI,
-                    functionName: 'unstake',
-                    args: [2, parseUnits(stakedAmountPerUser_56.toString(), global.CHIBA_TOKEN.decimals)]
-                }
-                const preparedData = await prepareWriteContract(data)
-                const writeData = await writeContract(preparedData)
-                const txPendingData = waitForTransaction(writeData)
-                toast.promise(txPendingData, {
-                    pending: "Waiting for pending... 👌",
-                });
-
-                const txData = await txPendingData;
-                if (txData && txData.status === "success") {
-                    toast.success(`Successfully Unstaked! 👌`)
-                } else {
-                    toast.error("Error! Unstaking is failed.");
-                }
-            }
-        } catch (error) {
-            toast.error("Error! Something went wrong.");
-            console.log(error);
-        }
-        // handleClickOutside();
-        setShowButtonList_14(false);
-        setShowButtonList_28(false);
-        setShowButtonList_56(false);
-    }
-
     return (
         <div>
             <div className="flex md:flex-row flex-col items-start w-full min-h-screen relative font">
@@ -451,12 +158,18 @@ export default function StakingPage() {
                         </div>
                     )}
                     <div className="md:hidden flex justify-start font-medium text-center text-white text-sm rounded connect-button font-16 h-full mt-6 w-full">
-                        <ConnectWallet setWalletConnected={(val) => {
-                            if (val === undefined)
-                                setWalletConnected(false)
-                            else
-                                setWalletConnected(val)
-                        }} />
+                        <ConnectWallet
+                            setWalletConnected={(val) => {
+                                if (val === undefined)
+                                    setWalletConnected(false)
+                                else
+                                    setWalletConnected(val)
+                            }}
+                            compoundPending={compoundPending}
+                            claimEthPending={claimEthPending}
+                            claimChibaPending={claimChibaPending}
+                            unstakePending={unstakePending}
+                        />
                     </div>
                     <div className="bg-reward rounded-xl w-full flex flex-col items-start py-4 px-2.5 gap-2.5 mt-5">
                         <div className="flex items-center gap-3">
@@ -488,12 +201,18 @@ export default function StakingPage() {
                                     </div>
                                 )}
                                 <div className="font-medium text-center text-white text-sm rounded connect-button font-16 h-full">
-                                    <ConnectWallet setWalletConnected={(val) => {
-                                        if (val === undefined)
-                                            setWalletConnected(false)
-                                        else
-                                            setWalletConnected(val)
-                                    }} />
+                                    <ConnectWallet
+                                        setWalletConnected={(val) => {
+                                            if (val === undefined)
+                                                setWalletConnected(false)
+                                            else
+                                                setWalletConnected(val)
+                                        }}
+                                        compoundPending={compoundPending}
+                                        claimEthPending={claimEthPending}
+                                        claimChibaPending={claimChibaPending}
+                                        unstakePending={unstakePending}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -527,11 +246,17 @@ export default function StakingPage() {
                                     </div>
                                     <div className="font-lg text-center text-white text-sm rounded connect-button w-full">
                                         <StakeBtn
+                                            setRefresh={setRefresh}
+                                            refresh={refresh}
                                             connected={walletConnected}
                                             stakeModalOption={15}
                                             amount={walletBalance}
                                             allowance={allowance}
                                             ethBalance={ethBalance}
+                                            compoundPending={compoundPending}
+                                            claimEthPending={claimEthPending}
+                                            claimChibaPending={claimChibaPending}
+                                            unstakePending={unstakePending}
                                         />
                                     </div>
                                 </div>
@@ -561,6 +286,10 @@ export default function StakingPage() {
                                             amount={walletBalance}
                                             allowance={allowance}
                                             ethBalance={ethBalance}
+                                            compoundPending={compoundPending}
+                                            claimEthPending={claimEthPending}
+                                            claimChibaPending={claimChibaPending}
+                                            unstakePending={unstakePending}
                                         />
                                     </div>
                                 </div>
@@ -590,6 +319,10 @@ export default function StakingPage() {
                                             amount={walletBalance}
                                             allowance={allowance}
                                             ethBalance={ethBalance}
+                                            compoundPending={compoundPending}
+                                            claimEthPending={claimEthPending}
+                                            claimChibaPending={claimChibaPending}
+                                            unstakePending={unstakePending}
                                         />
                                     </div>
                                 </div>
@@ -615,6 +348,10 @@ export default function StakingPage() {
                                                 amount={walletBalance}
                                                 allowance={allowance}
                                                 ethBalance={ethBalance}
+                                                compoundPending={compoundPending}
+                                                claimEthPending={claimEthPending}
+                                                claimChibaPending={claimChibaPending}
+                                                unstakePending={unstakePending}
                                             />
                                         </div>
                                     </div>
@@ -652,22 +389,45 @@ export default function StakingPage() {
                                             <LockRemain stakedTimePerUser={stakedTimePerUser_14} type={14} />
                                         </div>
                                         <div className="lg:block hidden relative">
-                                            <button className="outline-none" onClick={() => {
-                                                setShowButtonList_28(false);
-                                                setShowButtonList_56(false);
-                                                setShowButtonList_14(!showButtonList_14);
-                                            }}>
+                                            <button
+                                                className="outline-none"
+                                                onClick={() => {
+                                                    setShowButtonList_28(false);
+                                                    setShowButtonList_56(false);
+                                                    setShowButtonList_14(!showButtonList_14);
+                                                }}
+                                                disabled={(compoundPending === true || claimEthPending === true || claimChibaPending === true || unstakePending === true) ? true : false}
+                                            >
                                                 <svg width="16" height="29" viewBox="0 0 16 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M5.74539 25.4064C5.74539 24.6634 6.04231 23.9509 6.57082 23.4256C7.09933 22.9002 7.81615 22.6051 8.56357 22.6051C9.311 22.6051 10.0278 22.9002 10.5563 23.4256C11.0848 23.9509 11.3818 24.6634 11.3818 25.4064C11.3818 26.1493 11.0848 26.8618 10.5563 27.3872C10.0278 27.9125 9.311 28.2076 8.56357 28.2076C7.81615 28.2076 7.09933 27.9125 6.57082 27.3872C6.04231 26.8618 5.74539 26.1493 5.74539 25.4064ZM5.74539 14.2012C5.74539 13.4583 6.04231 12.7458 6.57082 12.2204C7.09933 11.6951 7.81615 11.4 8.56357 11.4C9.311 11.4 10.0278 11.6951 10.5563 12.2204C11.0848 12.7458 11.3818 13.4583 11.3818 14.2012C11.3818 14.9442 11.0848 15.6567 10.5563 16.182C10.0278 16.7074 9.311 17.0025 8.56357 17.0025C7.81615 17.0025 7.09933 16.7074 6.57082 16.182C6.04231 15.6567 5.74539 14.9442 5.74539 14.2012ZM5.74539 2.99611C5.74539 2.25316 6.04231 1.54064 6.57082 1.0153C7.09933 0.489958 7.81615 0.194824 8.56357 0.194824C9.311 0.194824 10.0278 0.489958 10.5563 1.0153C11.0848 1.54064 11.3818 2.25316 11.3818 2.99611C11.3818 3.73905 11.0848 4.45157 10.5563 4.97691C10.0278 5.50225 9.311 5.79739 8.56357 5.79739C7.81615 5.79739 7.09933 5.50225 6.57082 4.97691C6.04231 4.45157 5.74539 3.73905 5.74539 2.99611Z" fill="white"></path>
                                                 </svg>
                                             </button>
                                             {showButtonList_14 === true && (
                                                 <CommandBtnList
+                                                    setRefresh={setRefresh}
+                                                    refresh={refresh}
                                                     wrapperRef={wrapperRef}
-                                                    handleCompoundAndRelock={handleCompoundAndRelock}
-                                                    handleClaimChibaRewards={handleClaimChibaRewards}
-                                                    handleUnstake={handleUnstake}
                                                     poolOption={14}
+                                                    stakedAmountPerUser_14={stakedAmountPerUser_14}
+                                                    stakedAmountPerUser_28={stakedAmountPerUser_28}
+                                                    stakedAmountPerUser_56={stakedAmountPerUser_56}
+                                                    _minTokensToReceive1={_minTokensToReceive1}
+                                                    _minTokensToReceive2={_minTokensToReceive2}
+                                                    _minTokensToReceive3={_minTokensToReceive3}
+                                                    setShowButtonList_14={setShowButtonList_14}
+                                                    setShowButtonList_28={setShowButtonList_28}
+                                                    setShowButtonList_56={setShowButtonList_56}
+                                                    tokenRewarded_14={tokenRewarded_14}
+                                                    tokenRewarded_28={tokenRewarded_28}
+                                                    tokenRewarded_56={tokenRewarded_56}
+                                                    compoundPending={compoundPending}
+                                                    setCompoundPending={setCompoundPending}
+                                                    claimEthPending={claimEthPending}
+                                                    setClaimEthPending={setClaimEthPending}
+                                                    claimChibaPending={claimChibaPending}
+                                                    setClaimChibaPending={setClaimChibaPending}
+                                                    unstakePending={unstakePending}
+                                                    setUnstakePending={setUnstakePending}
                                                 />
                                             )}
                                         </div>
@@ -707,22 +467,45 @@ export default function StakingPage() {
                                             <LockRemain stakedTimePerUser={stakedTimePerUser_28} type={28} />
                                         </div>
                                         <div className="lg:block hidden relative">
-                                            <button className="outline-none" onClick={() => {
-                                                setShowButtonList_14(false);
-                                                setShowButtonList_56(false);
-                                                setShowButtonList_28(!showButtonList_28);
-                                            }}>
+                                            <button
+                                                className="outline-none"
+                                                onClick={() => {
+                                                    setShowButtonList_14(false);
+                                                    setShowButtonList_56(false);
+                                                    setShowButtonList_28(!showButtonList_28);
+                                                }}
+                                                disabled={(compoundPending === true || claimEthPending === true || claimChibaPending === true || unstakePending === true) ? true : false}
+                                            >
                                                 <svg width="16" height="29" viewBox="0 0 16 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M5.74539 25.4064C5.74539 24.6634 6.04231 23.9509 6.57082 23.4256C7.09933 22.9002 7.81615 22.6051 8.56357 22.6051C9.311 22.6051 10.0278 22.9002 10.5563 23.4256C11.0848 23.9509 11.3818 24.6634 11.3818 25.4064C11.3818 26.1493 11.0848 26.8618 10.5563 27.3872C10.0278 27.9125 9.311 28.2076 8.56357 28.2076C7.81615 28.2076 7.09933 27.9125 6.57082 27.3872C6.04231 26.8618 5.74539 26.1493 5.74539 25.4064ZM5.74539 14.2012C5.74539 13.4583 6.04231 12.7458 6.57082 12.2204C7.09933 11.6951 7.81615 11.4 8.56357 11.4C9.311 11.4 10.0278 11.6951 10.5563 12.2204C11.0848 12.7458 11.3818 13.4583 11.3818 14.2012C11.3818 14.9442 11.0848 15.6567 10.5563 16.182C10.0278 16.7074 9.311 17.0025 8.56357 17.0025C7.81615 17.0025 7.09933 16.7074 6.57082 16.182C6.04231 15.6567 5.74539 14.9442 5.74539 14.2012ZM5.74539 2.99611C5.74539 2.25316 6.04231 1.54064 6.57082 1.0153C7.09933 0.489958 7.81615 0.194824 8.56357 0.194824C9.311 0.194824 10.0278 0.489958 10.5563 1.0153C11.0848 1.54064 11.3818 2.25316 11.3818 2.99611C11.3818 3.73905 11.0848 4.45157 10.5563 4.97691C10.0278 5.50225 9.311 5.79739 8.56357 5.79739C7.81615 5.79739 7.09933 5.50225 6.57082 4.97691C6.04231 4.45157 5.74539 3.73905 5.74539 2.99611Z" fill="white"></path>
                                                 </svg>
                                             </button>
                                             {showButtonList_28 === true && (
                                                 <CommandBtnList
+                                                    setRefresh={setRefresh}
+                                                    refresh={refresh}
                                                     wrapperRef={wrapperRef}
-                                                    handleCompoundAndRelock={handleCompoundAndRelock}
-                                                    handleClaimChibaRewards={handleClaimChibaRewards}
-                                                    handleUnstake={handleUnstake}
                                                     poolOption={28}
+                                                    stakedAmountPerUser_14={stakedAmountPerUser_14}
+                                                    stakedAmountPerUser_28={stakedAmountPerUser_28}
+                                                    stakedAmountPerUser_56={stakedAmountPerUser_56}
+                                                    _minTokensToReceive1={_minTokensToReceive1}
+                                                    _minTokensToReceive2={_minTokensToReceive2}
+                                                    _minTokensToReceive3={_minTokensToReceive3}
+                                                    setShowButtonList_14={setShowButtonList_14}
+                                                    setShowButtonList_28={setShowButtonList_28}
+                                                    setShowButtonList_56={setShowButtonList_56}
+                                                    tokenRewarded_14={tokenRewarded_14}
+                                                    tokenRewarded_28={tokenRewarded_28}
+                                                    tokenRewarded_56={tokenRewarded_56}
+                                                    compoundPending={compoundPending}
+                                                    setCompoundPending={setCompoundPending}
+                                                    claimEthPending={claimEthPending}
+                                                    setClaimEthPending={setClaimEthPending}
+                                                    claimChibaPending={claimChibaPending}
+                                                    setClaimChibaPending={setClaimChibaPending}
+                                                    unstakePending={unstakePending}
+                                                    setUnstakePending={setUnstakePending}
                                                 />
                                             )}
                                         </div>
@@ -761,22 +544,45 @@ export default function StakingPage() {
                                             <LockRemain stakedTimePerUser={stakedTimePerUser_56} type={56} />
                                         </div>
                                         <div className="lg:block hidden relative">
-                                            <button className="outline-none" onClick={() => {
-                                                setShowButtonList_14(false);
-                                                setShowButtonList_28(false);
-                                                setShowButtonList_56(!showButtonList_56);
-                                            }}>
+                                            <button
+                                                className="outline-none"
+                                                onClick={() => {
+                                                    setShowButtonList_14(false);
+                                                    setShowButtonList_28(false);
+                                                    setShowButtonList_56(!showButtonList_56);
+                                                }}
+                                                disabled={(compoundPending === true || claimEthPending === true || claimChibaPending === true || unstakePending === true) ? true : false}
+                                            >
                                                 <svg width="16" height="29" viewBox="0 0 16 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M5.74539 25.4064C5.74539 24.6634 6.04231 23.9509 6.57082 23.4256C7.09933 22.9002 7.81615 22.6051 8.56357 22.6051C9.311 22.6051 10.0278 22.9002 10.5563 23.4256C11.0848 23.9509 11.3818 24.6634 11.3818 25.4064C11.3818 26.1493 11.0848 26.8618 10.5563 27.3872C10.0278 27.9125 9.311 28.2076 8.56357 28.2076C7.81615 28.2076 7.09933 27.9125 6.57082 27.3872C6.04231 26.8618 5.74539 26.1493 5.74539 25.4064ZM5.74539 14.2012C5.74539 13.4583 6.04231 12.7458 6.57082 12.2204C7.09933 11.6951 7.81615 11.4 8.56357 11.4C9.311 11.4 10.0278 11.6951 10.5563 12.2204C11.0848 12.7458 11.3818 13.4583 11.3818 14.2012C11.3818 14.9442 11.0848 15.6567 10.5563 16.182C10.0278 16.7074 9.311 17.0025 8.56357 17.0025C7.81615 17.0025 7.09933 16.7074 6.57082 16.182C6.04231 15.6567 5.74539 14.9442 5.74539 14.2012ZM5.74539 2.99611C5.74539 2.25316 6.04231 1.54064 6.57082 1.0153C7.09933 0.489958 7.81615 0.194824 8.56357 0.194824C9.311 0.194824 10.0278 0.489958 10.5563 1.0153C11.0848 1.54064 11.3818 2.25316 11.3818 2.99611C11.3818 3.73905 11.0848 4.45157 10.5563 4.97691C10.0278 5.50225 9.311 5.79739 8.56357 5.79739C7.81615 5.79739 7.09933 5.50225 6.57082 4.97691C6.04231 4.45157 5.74539 3.73905 5.74539 2.99611Z" fill="white"></path>
                                                 </svg>
                                             </button>
                                             {showButtonList_56 === true && (
                                                 <CommandBtnList
+                                                    setRefresh={setRefresh}
+                                                    refresh={refresh}
                                                     wrapperRef={wrapperRef}
-                                                    handleCompoundAndRelock={handleCompoundAndRelock}
-                                                    handleClaimChibaRewards={handleClaimChibaRewards}
-                                                    handleUnstake={handleUnstake}
                                                     poolOption={56}
+                                                    stakedAmountPerUser_14={stakedAmountPerUser_14}
+                                                    stakedAmountPerUser_28={stakedAmountPerUser_28}
+                                                    stakedAmountPerUser_56={stakedAmountPerUser_56}
+                                                    _minTokensToReceive1={_minTokensToReceive1}
+                                                    _minTokensToReceive2={_minTokensToReceive2}
+                                                    _minTokensToReceive3={_minTokensToReceive3}
+                                                    setShowButtonList_14={setShowButtonList_14}
+                                                    setShowButtonList_28={setShowButtonList_28}
+                                                    setShowButtonList_56={setShowButtonList_56}
+                                                    tokenRewarded_14={tokenRewarded_14}
+                                                    tokenRewarded_28={tokenRewarded_28}
+                                                    tokenRewarded_56={tokenRewarded_56}
+                                                    compoundPending={compoundPending}
+                                                    setCompoundPending={setCompoundPending}
+                                                    claimEthPending={claimEthPending}
+                                                    setClaimEthPending={setClaimEthPending}
+                                                    claimChibaPending={claimChibaPending}
+                                                    setClaimChibaPending={setClaimChibaPending}
+                                                    unstakePending={unstakePending}
+                                                    setUnstakePending={setUnstakePending}
                                                 />
                                             )}
                                         </div>

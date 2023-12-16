@@ -7,7 +7,7 @@ import { multicall, fetchBalance } from '@wagmi/core';
 import { global } from "../config/global";
 import { formatUnits } from "viem";
 
-export function useStakingContractStatus() {
+export function useStakingContractStatus(refresh) {
     const [data, setData] = useState({
         walletBalance: 0,             // Amount of connected account's CHIBA tokens 
         totalEthRewarded_14: 0,       // Sum of totalRewards
@@ -157,21 +157,21 @@ export function useStakingContractStatus() {
                 setData({
                     walletBalance: _data[0].status === "success" ? parseFloat(formatUnits(_data[0].result, global.CHIBA_TOKEN.decimals)).toFixed(2) : 0,
                     // For 14 days pool
-                    totalEthRewarded_14: _data[1].status === "success" ? parseFloat(formatUnits(_data[1].result[6], global.EthDecimals)).toFixed(2) : 0,
+                    totalEthRewarded_14: _data[1].status === "success" ? parseFloat(formatUnits(_data[1].result[6], global.EthDecimals)).toFixed(5) : 0,
                     totalStakedAmount_14: _data[1].status === "success" ? parseFloat(formatUnits(_data[1].result[3], global.CHIBA_TOKEN.decimals)).toFixed(2) : 0,
                     stakedAmountPerUser_14: _data[2].status === "success" ? parseFloat(formatUnits(_data[2].result[0], global.CHIBA_TOKEN.decimals)) : 0,
                     stakedTimePerUser_14: _data[2].status === "success" ? Number(_data[2].result[1]) : 0,
                     unClaimed_14: _data[3].status === "success" ? parseFloat(formatUnits(_data[3].result, global.EthDecimals)).toFixed(10) : 0,
                     tokenRewarded_14: _data[4].status === "success" ? parseFloat(formatUnits(_data[4].result, global.CHIBA_TOKEN.decimals)).toFixed(5) : 0,
                     // For 28 days pool
-                    totalEthRewarded_28: _data[5].status === "success" ? parseFloat(formatUnits(_data[5].result[6], global.EthDecimals)).toFixed(2) : 0,
+                    totalEthRewarded_28: _data[5].status === "success" ? parseFloat(formatUnits(_data[5].result[6], global.EthDecimals)).toFixed(5) : 0,
                     totalStakedAmount_28: _data[5].status === "success" ? parseFloat(formatUnits(_data[5].result[3], global.CHIBA_TOKEN.decimals)).toFixed(2) : 0,
                     stakedAmountPerUser_28: _data[6].status === "success" ? parseFloat(formatUnits(_data[6].result[0], global.CHIBA_TOKEN.decimals)) : 0,
                     stakedTimePerUser_28: _data[6].status === "success" ? Number(_data[6].result[1]) : 0,
                     unClaimed_28: _data[7].status === "success" ? parseFloat(formatUnits(_data[7].result, global.EthDecimals)).toFixed(10) : 0,
                     tokenRewarded_28: _data[8].status === "success" ? parseFloat(formatUnits(_data[8].result, global.CHIBA_TOKEN.decimals)).toFixed(5) : 0,
                     // For 56 days pool
-                    totalEthRewarded_56: _data[9].status === "success" ? parseFloat(formatUnits(_data[9].result[6], global.EthDecimals)).toFixed(2) : 0,
+                    totalEthRewarded_56: _data[9].status === "success" ? parseFloat(formatUnits(_data[9].result[6], global.EthDecimals)).toFixed(5) : 0,
                     totalStakedAmount_56: _data[9].status === "success" ? parseFloat(formatUnits(_data[9].result[3], global.CHIBA_TOKEN.decimals)).toFixed(2) : 0,
                     stakedAmountPerUser_56: _data[10].status === "success" ? parseFloat(formatUnits(_data[10].result[0], global.CHIBA_TOKEN.decimals)) : 0,
                     stakedTimePerUser_56: _data[10].status === "success" ? Number(_data[10].result[1]) : 0,
@@ -185,7 +185,7 @@ export function useStakingContractStatus() {
             }
         };
         fetchData();
-    }, [address, refetch])
+    }, [address, refetch, refresh])
 
     return data
 }

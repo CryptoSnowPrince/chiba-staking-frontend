@@ -4,14 +4,15 @@ import { Dialog, Transition } from '@headlessui/react'
 import chibaIco from "../assets/img/chiba.png";
 import clsx from 'clsx';
 import { global } from "../config/global";
-import { formatUnits, parseUnits } from 'viem';
-import { useAccount } from 'wagmi';
+import { parseUnits } from 'viem';
 import { writeContract, prepareWriteContract, waitForTransaction } from "@wagmi/core"
 import { toast } from "react-toastify";
 import StakingContractABI from "../assets/abi/stakingContract.json";
 import chibaTokenContractABI from "../assets/abi/chibaTokenContract.json";
 import { staticConfig } from "../components/static";
 import { getDefaultGas } from "../utils/utils"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 const StakingOptionModal = (props) => {
     const [open, setOpen] = useState(false)
@@ -21,7 +22,7 @@ const StakingOptionModal = (props) => {
     const [btnMsg, setBtnMsg] = useState("Stake");
     const [errMsg, setErrMsg] = useState(false);
     const [pending, setPending] = useState(false);
-    const [btnDisabled, setBtnDisabled] =useState(false);
+    // const [btnDisabled, setBtnDisabled] = useState(false);
 
     const cancelButtonRef = useRef(null)
 
@@ -39,10 +40,14 @@ const StakingOptionModal = (props) => {
     }, [props.showOpen])
 
     useEffect(() => {
+        if (!props) {
+            setBtnMsg("LOADING...")
+            setErrMsg("Please wait! Loading...")
+            return
+        }
         if (pending) {
-            setBtnMsg("Pending...")
+            setBtnMsg("Pending ")
             setErrMsg("Please wait! Pending...")
-            // setBtnDisabled(true)
             return
         }
         if (props.ethBalance < getDefaultGas()) {
@@ -70,10 +75,12 @@ const StakingOptionModal = (props) => {
             return
         }
         setBtnMsg("Stake")
-        setBtnDisabled(false)
+        setErrMsg("Please wait! Staking...")
+        // setBtnDisabled(false)
     }, [stakeAmount, pending, props.amount, props.ethBalance, props.allowance])
 
     const handleApprove = async () => {
+        setPending(true);
         try {
             let dataApprove = {
                 chainId: global.chain.id,
@@ -109,114 +116,133 @@ const StakingOptionModal = (props) => {
             }
         } catch (error) {
             console.log(error);
+            try {
+                if (error?.shortMessage) {
+                    toast.error(error?.shortMessage);
+                } else {
+                    toast.error("Unknown Error! Something went wrong.");
+                }
+            } catch (error) {
+                toast.error("Error! Something went wrong.");
+            }
         }
+        try {
+            if (props.setRefresh !== undefined && props.refresh !== undefined) {
+                props.setRefresh(!props.refresh)
+            }
+        } catch (error) { }
+        setPending(false);
+        return
     }
 
     const handleStake = async () => {
+        setPending(true);
         try {
             // if (props.allowance >= stakeAmount) {
-                if (modalOption === 15) {
-                    dataStaking = {
-                        ...dataStaking,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'stake',
-                        args: [0, parseUnits(stakeAmount.toString(), ChibaDecimals)]
-                    }
-                    const preparedData = await prepareWriteContract(dataStaking)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Staked! 👌`)
-                        handleClose()
-                    } else {
-                        toast.error("Error! Staking is failed.");
-                    }
-                } else if (modalOption === 40) {
-                    dataStaking = {
-                        ...dataStaking,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'stake',
-                        args: [1, parseUnits(stakeAmount.toString(), ChibaDecimals)]
-                    }
-                    const preparedData = await prepareWriteContract(dataStaking)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Staked! 👌`)
-                        handleClose()
-                    } else {
-                        toast.error("Error! Staking is failed.");
-                    }
-                } else if (modalOption === 60) {
-                    dataStaking = {
-                        ...dataStaking,
-                        address: stakingContractAddress,
-                        abi: StakingContractABI,
-                        functionName: 'stake',
-                        args: [2, parseUnits(stakeAmount.toString(), ChibaDecimals)]
-                    }
-                    const preparedData = await prepareWriteContract(dataStaking)
-                    const writeData = await writeContract(preparedData)
-                    const txPendingData = waitForTransaction(writeData)
-                    toast.promise(txPendingData, {
-                        pending: "Waiting for pending... 👌",
-                    });
-
-                    const txData = await txPendingData;
-                    if (txData && txData.status === "success") {
-                        toast.success(`Successfully Staked! 👌`)
-                        handleClose()
-                    } else {
-                        toast.error("Error! Staking is failed.");
-                    }
+            if (modalOption === 15) {
+                dataStaking = {
+                    ...dataStaking,
+                    address: stakingContractAddress,
+                    abi: StakingContractABI,
+                    functionName: 'stake',
+                    args: [0, parseUnits(stakeAmount.toString(), ChibaDecimals)]
                 }
-            // } else {
-                // setApproved(false);
-                // toast.error("Error! Staking is failed.");
-                // return;
-            // }
+                const preparedData = await prepareWriteContract(dataStaking)
+                const writeData = await writeContract(preparedData)
+                const txPendingData = waitForTransaction(writeData)
+                toast.promise(txPendingData, {
+                    pending: "Waiting for pending... 👌",
+                });
+
+                const txData = await txPendingData;
+                if (txData && txData.status === "success") {
+                    toast.success(`Successfully Staked! 👌`)
+                    handleClose()
+                } else {
+                    toast.error("Error! Staking is failed.");
+                }
+            } else if (modalOption === 40) {
+                dataStaking = {
+                    ...dataStaking,
+                    address: stakingContractAddress,
+                    abi: StakingContractABI,
+                    functionName: 'stake',
+                    args: [1, parseUnits(stakeAmount.toString(), ChibaDecimals)]
+                }
+                const preparedData = await prepareWriteContract(dataStaking)
+                const writeData = await writeContract(preparedData)
+                const txPendingData = waitForTransaction(writeData)
+                toast.promise(txPendingData, {
+                    pending: "Waiting for pending... 👌",
+                });
+
+                const txData = await txPendingData;
+                if (txData && txData.status === "success") {
+                    toast.success(`Successfully Staked! 👌`)
+                    handleClose()
+                } else {
+                    toast.error("Error! Staking is failed.");
+                }
+            } else if (modalOption === 60) {
+                dataStaking = {
+                    ...dataStaking,
+                    address: stakingContractAddress,
+                    abi: StakingContractABI,
+                    functionName: 'stake',
+                    args: [2, parseUnits(stakeAmount.toString(), ChibaDecimals)]
+                }
+                const preparedData = await prepareWriteContract(dataStaking)
+                const writeData = await writeContract(preparedData)
+                const txPendingData = waitForTransaction(writeData)
+                toast.promise(txPendingData, {
+                    pending: "Waiting for pending... 👌",
+                });
+
+                const txData = await txPendingData;
+                if (txData && txData.status === "success") {
+                    toast.success(`Successfully Staked! 👌`)
+                    handleClose()
+                } else {
+                    toast.error("Error! Staking is failed.");
+                }
+            }
         } catch (error) {
-            toast.error("Error! Something went wrong.");
+            console.log(error);
+            try {
+                if (error?.shortMessage) {
+                    toast.error(error?.shortMessage);
+                } else {
+                    toast.error("Unknown Error! Something went wrong.");
+                }
+            } catch (error) {
+                toast.error("Error! Something went wrong.");
+            }
         }
+        try {
+            if (props.setRefresh !== undefined && props.refresh !== undefined) {
+                props.setRefresh(!props.refresh)
+            }
+        } catch (error) { }
+        setPending(false);
+        return;
     }
 
     const handleBtn = async () => {
         if (btnMsg === "Stake") {
-            setPending(true);
             await handleStake();
-            setPending(false)
-            return
-        }
-        if (btnMsg === "Approve") {
-            setPending(true)
+        } else if (btnMsg === "Approve") {
             await handleApprove();
-            setPending(false);
-            return
-        }
-        toast.warn(errMsg);
+        } else
+            toast.warn(errMsg);
     }
 
     const handleClose = () => {
-        // setApproved(true);
         setStakeAmount();
         setModalOption(props.stakeModalOption);
         props.onClose();
     }
 
     const handleChange = (val) => {
-        // setApproved(true)
         setStakeAmount(val)
     }
 
@@ -275,7 +301,14 @@ const StakingOptionModal = (props) => {
                                                     <div className="flex flex-col gap-3">
                                                         <div className="relative">
                                                             {/* <input type="number" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="Enter Amount" className="bg-violet-7 w-full rounded text-white text-base py-4 pl-5 pr-28 outline-none [&amp;::-webkit-inner-spin-button]:appearance-none" /> */}
-                                                            <input type="number" value={stakeAmount} onChange={(e) => handleChange(e.target.value)} placeholder="Enter Amount" className="bg-violet-7 w-full rounded text-white text-base py-4 pl-5 pr-28 outline-none [&amp;::-webkit-inner-spin-button]:appearance-none" />
+                                                            <input
+                                                                type="number"
+                                                                value={stakeAmount}
+                                                                onChange={(e) => handleChange(e.target.value)}
+                                                                placeholder="Enter Amount"
+                                                                className="bg-violet-7 w-full rounded text-white text-base py-4 pl-5 pr-28 outline-none [&amp;::-webkit-inner-spin-button]:appearance-none"
+                                                                disabled={pending}
+                                                            />
                                                             <button onClick={() => setStakeAmount(props.walletBalance)} className="font-medium text-center text-white px-4 py-2 text-sm rounded bg-violet-1 hover:bg-opacity-80 absolute right-5 top-3">Max</button>
                                                         </div>
                                                         <div className="flex items-center gap-2">
@@ -286,9 +319,14 @@ const StakingOptionModal = (props) => {
                                                     </div>
                                                     <p className="text-sm font-medium text-white text-opacity-75"> You are staking {stakeAmount} $CHIBA tokens. </p>
                                                     <button onClick={handleBtn}
-                                                        className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full", btnDisabled ? "connect-button-disable" : "connect-button")}
-                                                        disabled={btnDisabled ? true : false}>
-                                                        {btnMsg}
+                                                        className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full connect-button")}
+                                                        // className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full", btnDisabled ? "connect-button-disable" : "connect-button")}
+                                                        // disabled={btnDisabled ? true : false}
+                                                    >
+                                                        <div>
+                                                            {btnMsg}
+                                                            {pending ? <FontAwesomeIcon icon={faSpinner} size="sm" className="animate-spin" /> : <></>}
+                                                        </div>
                                                     </button>
                                                 </div>
                                             </div>

@@ -1,6 +1,6 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
-export const ConnectWallet = ({setWalletConnected}) => {
+export const ConnectWallet = (props) => {
     return (
         <ConnectButton.Custom>
             {({
@@ -21,7 +21,7 @@ export const ConnectWallet = ({setWalletConnected}) => {
                     chain &&
                     (!authenticationStatus ||
                         authenticationStatus === 'authenticated');
-                setWalletConnected (connected)
+                props.setWalletConnected(connected)
                 return (
                     <div className='w-full'
                         {...(!ready && {
@@ -55,6 +55,7 @@ export const ConnectWallet = ({setWalletConnected}) => {
                                         style={{ display: 'flex', alignItems: 'center' }}
                                         type="button"
                                         className='px-5 py-2.5'
+                                        disabled={(props.compoundPending === true || props.claimEthPending === true || props.claimChibaPending === true || props.unstakePending === true) ? true : false}
                                     >
                                         {chain.hasIcon && (
                                             <div
@@ -78,7 +79,12 @@ export const ConnectWallet = ({setWalletConnected}) => {
                                         )}
                                         {chain.name}
                                     </button>
-                                    <button onClick={openAccountModal} type="button" className='px-5 py-2.5'>
+                                    <button
+                                        onClick={openAccountModal}
+                                        type="button"
+                                        className='px-5 py-2.5'
+                                        disabled={(props.compoundPending === true || props.claimEthPending === true || props.claimChibaPending === true || props.unstakePending === true) ? true : false}
+                                    >
                                         {account.displayName}
                                         {account.displayBalance
                                             ? ` (${account.displayBalance})`
