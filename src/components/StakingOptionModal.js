@@ -93,6 +93,8 @@ const StakingOptionModal = (props) => {
                     functionName: 'increaseAllowance',
                     args: [stakingContractAddress, staticConfig.MAX_UINT256_HALF],
                 }
+                // const incApproveData = 
+                await prepareWriteContract(dataApprove)
             } catch (error) {
                 dataApprove = {
                     ...dataApprove,
@@ -320,8 +322,8 @@ const StakingOptionModal = (props) => {
                                                     <p className="text-sm font-medium text-white text-opacity-75"> You are staking {stakeAmount} $CHIBA tokens. </p>
                                                     <button onClick={handleBtn}
                                                         className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full connect-button")}
-                                                        // className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full", btnDisabled ? "connect-button-disable" : "connect-button")}
-                                                        // disabled={btnDisabled ? true : false}
+                                                    // className={clsx("font-medium text-center text-white text-sm rounded font-16 py-2.5 px-5 w-full", btnDisabled ? "connect-button-disable" : "connect-button")}
+                                                    // disabled={btnDisabled ? true : false}
                                                     >
                                                         <div>
                                                             {btnMsg}
