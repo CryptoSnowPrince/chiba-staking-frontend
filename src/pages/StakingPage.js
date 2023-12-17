@@ -12,6 +12,7 @@ import { useAccount } from "wagmi";
 import IUniswapV2Router01ContractABI from "../assets/abi/IUniswapV2Router01ContractABI.json";
 import { parseUnits, formatUnits } from 'viem';
 import CommandBtnList from '../components/CommandBtnList';
+import MobileCommandBtnList from '../components/MobileCommandBtnList';
 import { useContractRead } from 'wagmi';
 
 export default function StakingPage() {
@@ -431,6 +432,31 @@ export default function StakingPage() {
                                                 />
                                             )}
                                         </div>
+                                        <div className='md:hidden relative'>
+                                            <MobileCommandBtnList
+                                                wrapperRef={wrapperRef}
+                                                setRefresh={setRefresh}
+                                                refresh={refresh}
+                                                poolOption={14}
+                                                stakedAmountPerUser_14={stakedAmountPerUser_14}
+                                                stakedAmountPerUser_28={stakedAmountPerUser_28}
+                                                stakedAmountPerUser_56={stakedAmountPerUser_56}
+                                                _minTokensToReceive1={_minTokensToReceive1}
+                                                _minTokensToReceive2={_minTokensToReceive2}
+                                                _minTokensToReceive3={_minTokensToReceive3}
+                                                tokenRewarded_14={tokenRewarded_14}
+                                                tokenRewarded_28={tokenRewarded_28}
+                                                tokenRewarded_56={tokenRewarded_56}
+                                                compoundPending={compoundPending}
+                                                setCompoundPending={setCompoundPending}
+                                                claimEthPending={claimEthPending}
+                                                setClaimEthPending={setClaimEthPending}
+                                                claimChibaPending={claimChibaPending}
+                                                setClaimChibaPending={setClaimChibaPending}
+                                                unstakePending={unstakePending}
+                                                setUnstakePending={setUnstakePending}
+                                            />
+                                        </div>
                                     </div>
                                 )}
                                 {stakedAmountPerUser_28 !== 0 && (
@@ -509,6 +535,31 @@ export default function StakingPage() {
                                                 />
                                             )}
                                         </div>
+                                        <div className='md:hidden relative'>
+                                            <MobileCommandBtnList
+                                                wrapperRef={wrapperRef}
+                                                setRefresh={setRefresh}
+                                                refresh={refresh}
+                                                poolOption={28}
+                                                stakedAmountPerUser_14={stakedAmountPerUser_14}
+                                                stakedAmountPerUser_28={stakedAmountPerUser_28}
+                                                stakedAmountPerUser_56={stakedAmountPerUser_56}
+                                                _minTokensToReceive1={_minTokensToReceive1}
+                                                _minTokensToReceive2={_minTokensToReceive2}
+                                                _minTokensToReceive3={_minTokensToReceive3}
+                                                tokenRewarded_14={tokenRewarded_14}
+                                                tokenRewarded_28={tokenRewarded_28}
+                                                tokenRewarded_56={tokenRewarded_56}
+                                                compoundPending={compoundPending}
+                                                setCompoundPending={setCompoundPending}
+                                                claimEthPending={claimEthPending}
+                                                setClaimEthPending={setClaimEthPending}
+                                                claimChibaPending={claimChibaPending}
+                                                setClaimChibaPending={setClaimChibaPending}
+                                                unstakePending={unstakePending}
+                                                setUnstakePending={setUnstakePending}
+                                            />
+                                        </div>
                                     </div>
                                 )}
                                 {stakedAmountPerUser_56 !== 0 && (
@@ -585,6 +636,31 @@ export default function StakingPage() {
                                                     setUnstakePending={setUnstakePending}
                                                 />
                                             )}
+                                        </div>
+                                        <div className='md:hidden relative'>
+                                            <MobileCommandBtnList
+                                                wrapperRef={wrapperRef}
+                                                setRefresh={setRefresh}
+                                                refresh={refresh}
+                                                poolOption={56}
+                                                stakedAmountPerUser_14={stakedAmountPerUser_14}
+                                                stakedAmountPerUser_28={stakedAmountPerUser_28}
+                                                stakedAmountPerUser_56={stakedAmountPerUser_56}
+                                                _minTokensToReceive1={_minTokensToReceive1}
+                                                _minTokensToReceive2={_minTokensToReceive2}
+                                                _minTokensToReceive3={_minTokensToReceive3}
+                                                tokenRewarded_14={tokenRewarded_14}
+                                                tokenRewarded_28={tokenRewarded_28}
+                                                tokenRewarded_56={tokenRewarded_56}
+                                                compoundPending={compoundPending}
+                                                setCompoundPending={setCompoundPending}
+                                                claimEthPending={claimEthPending}
+                                                setClaimEthPending={setClaimEthPending}
+                                                claimChibaPending={claimChibaPending}
+                                                setClaimChibaPending={setClaimChibaPending}
+                                                unstakePending={unstakePending}
+                                                setUnstakePending={setUnstakePending}
+                                            />
                                         </div>
                                     </div>
                                 )}
